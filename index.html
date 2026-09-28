@@ -241,6 +241,15 @@
           </select>
         </div>
         <div class="field">
+          <label for="loginRol">Nivel de acceso <span class="req">*</span></label>
+          <select id="loginRol" required>
+            <option value="">Seleccioná tu rol…</option>
+            <option>Secretario/a</option>
+            <option>Director/a</option>
+            <option>Encargado/a Administrativo/a</option>
+          </select>
+        </div>
+        <div class="field">
           <label for="loginNombre">Nombre y apellido <span class="req">*</span></label>
           <input type="text" id="loginNombre" placeholder="Ej: María González" required>
         </div>
@@ -895,10 +904,9 @@
   const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzFTg1Q19jH6HAN25JBumpac8YTeerUnZZ2MI2GfmP1UqtYTmpAlSxpGm-twDZcu_9zJA/exec';
 
   const AREA_GROUPS = [
-    {grupo:'Departamentos de Intendencia', areas:[
-      {id:'secretaria_privada', nombre:'Secretaría Privada'},
-      {id:'asuntos_legales', nombre:'Asuntos Legales'},
-      {id:'escribania', nombre:'Escribanía'},
+    {grupo:'Intendencia', areas:[
+      {id:'intendencia', nombre:'Intendencia'},
+      {id:'vice_intendencia', nombre:'Vice Intendencia'},
     ]},
     {grupo:'Secretarías', areas:[
       {id:'coordinacion_general', nombre:'Coordinación General'},
@@ -925,19 +933,19 @@
    * Nodos hoja simplemente no tienen "departamentos" o "divisiones".
    * ============================================================ */
   const ORG_TREE = {
-    secretaria_privada: [
+    intendencia: [
       { nombre:'Secretaría Privada', departamentos:[
         { nombre:'Despacho y Mesa de Entrada', divisiones:[] }
-      ]}
-    ],
-    asuntos_legales: [
+      ]},
       { nombre:'Asesoría Letrada', departamentos:[
         { nombre:'Asuntos Legales', divisiones:[] },
         { nombre:'OMIDUC', divisiones:[] }
-      ]}
-    ],
-    escribania: [
+      ]},
       { nombre:'Escribanía', departamentos:[] }
+    ],
+    vice_intendencia: [
+      { nombre:'Tribunal de Faltas', departamentos:[] },
+      { nombre:'H.C.D.', departamentos:[] }
     ],
     coordinacion_general: [
       { nombre:'CEM', departamentos:[] },
@@ -1009,10 +1017,9 @@
     ],
     turismo_cultura: [
       { nombre:'Promoción Turística', departamentos:[] },
-      { nombre:'Cultura', departamentos:[
-        { nombre:'Festividades', divisiones:[] },
-        { nombre:'Patrimonio, Museo, Archivo Histórico', divisiones:[] }
-      ]}
+      { nombre:'Cultura', departamentos:[] },
+      { nombre:'Festividades', departamentos:[] },
+      { nombre:'Patrimonio, Museos y Archivo Histórico', departamentos:[] }
     ],
     desarrollo_productivo: [
       { nombre:'Producción', departamentos:[
@@ -1240,12 +1247,13 @@
   $('loginForm').addEventListener('submit', async function(ev){
     ev.preventDefault();
     const areaId = loginArea.value;
+    const rol = $('loginRol').value;
     const nombre = $('loginNombre').value.trim();
     const clave = $('loginClave').value;
     const err = $('loginError');
     err.style.display='none';
 
-    if(!areaId || !nombre || clave.length<4){
+    if(!areaId || !rol || !nombre || clave.length<4){
       err.textContent='Completá todos los campos obligatorios para continuar.';
       err.style.display='block';
       return;
@@ -1255,7 +1263,7 @@
     btn.disabled=true; btn.textContent='Verificando…';
     try{
       await api('login', {areaId, clave});
-      session = {areaId, areaNombre: AREA_MAP[areaId], nombre};
+      session = {areaId, areaNombre: AREA_MAP[areaId], rol, nombre};
       await startApp();
     }catch(e){
       err.textContent = e.message || 'No se pudo verificar el acceso.';
@@ -1276,7 +1284,7 @@
     $('loginWrap').style.display='none';
     $('app').style.display='block';
     $('sesArea').textContent = session.areaNombre;
-    $('sesUsuario').textContent = session.nombre;
+    $('sesUsuario').textContent = session.nombre + ' · ' + session.rol;
 
     const rrhh = esRRHH();
     $('tabSolicitudesBtn').style.display = rrhh ? 'none' : 'inline-block';
@@ -1429,9 +1437,9 @@
     let lista = rrhh ? [...empleados] : empleados.filter(e=>e.area===session.areaId);
     if(rrhh && areaF) lista = lista.filter(e=>e.area===areaF);
     if(texto) lista = lista.filter(e=>
-      String(e.nombre||'').toLowerCase().includes(texto) ||
-      String(e.dni||'').toLowerCase().includes(texto) ||
-      String(e.legajo||'').toLowerCase().includes(texto)
+      (e.nombre||'').toLowerCase().includes(texto) ||
+      (e.dni||'').toLowerCase().includes(texto) ||
+      (e.legajo||'').toLowerCase().includes(texto)
     );
     if(contratoF) lista = lista.filter(e=>e.contrato===contratoF);
 
@@ -1871,7 +1879,7 @@
     const orden = $('bndInaOrden').value;
 
     let lista = [...bandejaInasistencias];
-    if(texto) lista = lista.filter(i=>String(i.nombre||'').toLowerCase().includes(texto) || String(i.legajo||'').toLowerCase().includes(texto));
+    if(texto) lista = lista.filter(i=>(i.nombre||'').toLowerCase().includes(texto) || (i.legajo||'').toLowerCase().includes(texto));
     if(areaF) lista = lista.filter(i=>i.area===areaF);
     lista.sort((a,b)=> orden==='fecha_asc' ? a.fecha.localeCompare(b.fecha) : b.fecha.localeCompare(a.fecha));
 
@@ -1903,7 +1911,7 @@
     const orden = $('bndTarOrden').value;
 
     let lista = [...bandejaTardanzas];
-    if(texto) lista = lista.filter(t=>String(t.nombre||'').toLowerCase().includes(texto) || String(t.legajo||'').toLowerCase().includes(texto));
+    if(texto) lista = lista.filter(t=>(t.nombre||'').toLowerCase().includes(texto) || (t.legajo||'').toLowerCase().includes(texto));
     if(areaF) lista = lista.filter(t=>t.area===areaF);
     lista.sort((a,b)=> orden==='fecha_asc' ? a.fecha.localeCompare(b.fecha) : b.fecha.localeCompare(a.fecha));
 
