@@ -290,7 +290,7 @@
 
   table{width:100%;border-collapse:collapse;}
   thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:700;padding:10px 14px;border-bottom:1.5px solid var(--border);background:var(--surface-tint);white-space:nowrap;}
-  tbody td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13.5px;vertical-align:top;}
+  tbody td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13.5px;vertical-align:top;white-space:pre-line;}
   tbody tr:hover{background:var(--surface-tint);}
   .cell-name{font-weight:700;color:var(--text-strong);}
   .badge{display:inline-block;padding:4px 11px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;border-radius:var(--radius-pill);}
@@ -1654,9 +1654,9 @@
     let lista = rrhh ? [...empleados] : empleados.filter(e=>e.area===session.areaId);
     if(rrhh && areaF) lista = lista.filter(e=>e.area===areaF);
     if(texto) lista = lista.filter(e=>
-      (e.nombre||'').toLowerCase().includes(texto) ||
-      (e.dni||'').toLowerCase().includes(texto) ||
-      (e.legajo||'').toLowerCase().includes(texto)
+      String(e.nombre||'').toLowerCase().includes(texto) ||
+      String(e.dni||'').toLowerCase().includes(texto) ||
+      String(e.legajo||'').toLowerCase().includes(texto)
     );
     if(contratoF) lista = lista.filter(e=>e.contrato===contratoF);
 
@@ -1967,7 +1967,7 @@
     }
     let detalle = $('solDetalle').value.trim();
     if(tipo==='Otra' && otroTexto){
-      detalle = 'Motivo específico: ' + otroTexto + '\\n\\n' + detalle;
+      detalle = 'Motivo específico: ' + otroTexto + '\n\n' + detalle;
     }
 
     if(tipo==='Alta de personal'){
@@ -1990,21 +1990,21 @@
       const altaDivision = $('solAltaDivision').value;
 
       const fichaAlta =
-        'DATOS DEL NUEVO AGENTE PROPUESTO\\n' +
-        'Nombre y apellido: ' + altaNombre + '\\n' +
-        'DNI: ' + altaDni + '\\n' +
-        'CUIL: ' + altaCuil + '\\n' +
-        'Fecha de nacimiento: ' + altaFechaNac + '\\n' +
-        'Domicilio: ' + altaDomicilio + '\\n' +
-        'Fecha de ingreso propuesta: ' + altaFechaIngreso + '\\n' +
-        (altaDireccion ? 'Dirección: ' + altaDireccion + '\\n' : '') +
-        (altaDepartamento ? 'Departamento: ' + altaDepartamento + '\\n' : '') +
-        (altaDivision ? 'División: ' + altaDivision + '\\n' : '') +
-        'Cargo: ' + altaCargo + '\\n' +
-        'Tipo de contrato: ' + altaContrato + '\\n' +
-        (altaPersonaCargo ? 'Persona a cargo: ' + altaPersonaCargo + '\\n' : '') +
+        'DATOS DEL NUEVO AGENTE PROPUESTO\n' +
+        'Nombre y apellido: ' + altaNombre + '\n' +
+        'DNI: ' + altaDni + '\n' +
+        'CUIL: ' + altaCuil + '\n' +
+        'Fecha de nacimiento: ' + altaFechaNac + '\n' +
+        'Domicilio: ' + altaDomicilio + '\n' +
+        'Fecha de ingreso propuesta: ' + altaFechaIngreso + '\n' +
+        (altaDireccion ? 'Dirección: ' + altaDireccion + '\n' : '') +
+        (altaDepartamento ? 'Departamento: ' + altaDepartamento + '\n' : '') +
+        (altaDivision ? 'División: ' + altaDivision + '\n' : '') +
+        'Cargo: ' + altaCargo + '\n' +
+        'Tipo de contrato: ' + altaContrato + '\n' +
+        (altaPersonaCargo ? 'Persona a cargo: ' + altaPersonaCargo + '\n' : '') +
         'Contacto: ' + altaContacto +
-        (detalle ? '\\n\\nFundamento adicional:\\n' + detalle : '');
+        (detalle ? '\n\nFundamento adicional:\n' + detalle : '');
       detalle = fichaAlta;
     }
 
@@ -2173,7 +2173,7 @@
     const orden = $('bndInaOrden').value;
 
     let lista = [...bandejaInasistencias];
-    if(texto) lista = lista.filter(i=>(i.nombre||'').toLowerCase().includes(texto) || (i.legajo||'').toLowerCase().includes(texto));
+    if(texto) lista = lista.filter(i=>(i.nombre||'').toLowerCase().includes(texto) || String(i.legajo||'').toLowerCase().includes(texto));
     if(areaF) lista = lista.filter(i=>i.area===areaF);
     lista.sort((a,b)=> orden==='fecha_asc' ? a.fecha.localeCompare(b.fecha) : b.fecha.localeCompare(a.fecha));
 
@@ -2204,7 +2204,7 @@
     const orden = $('bndTarOrden').value;
 
     let lista = [...bandejaTardanzas];
-    if(texto) lista = lista.filter(t=>(t.nombre||'').toLowerCase().includes(texto) || (t.legajo||'').toLowerCase().includes(texto));
+    if(texto) lista = lista.filter(t=>(t.nombre||'').toLowerCase().includes(texto) || String(t.legajo||'').toLowerCase().includes(texto));
     if(areaF) lista = lista.filter(t=>t.area===areaF);
     lista.sort((a,b)=> orden==='fecha_asc' ? a.fecha.localeCompare(b.fecha) : b.fecha.localeCompare(a.fecha));
 
